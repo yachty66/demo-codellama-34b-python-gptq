@@ -17,7 +17,8 @@ def init() -> dict:
             trust_remote_code=False,
             device="cuda:0",
             use_triton=False,
-            quantize_config=None)
+            quantize_config=None,
+            inject_fused_attention=False)
 
     return {
         "model": model,
@@ -32,8 +33,7 @@ def handler(context: dict, request: Request) -> Response:
     max_new_tokens = request.json.get("max_new_tokens", 512)
     temperature = request.json.get("temperature", 0.7)
     prompt = request.json.get("prompt")
-    prompt_template= '''Info on prompt template will be added shortly.'''
-    input_ids = tokenizer(prompt_template, return_tensors='pt').input_ids.cuda()
+    input_ids = tokenizer(prompt, return_tensors='pt').input_ids.cuda()
     output = model.generate(inputs=input_ids, temperature=temperature, max_new_tokens=max_new_tokens)
     result = tokenizer.decode(output[0])
     return Response(json={"outputs": result}, status=200)
